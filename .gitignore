@@ -1,0 +1,4 @@
+# virtual environment for python
+venv/
+
+.idea/
