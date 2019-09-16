@@ -34,44 +34,49 @@ void setup()
   digitalWrite(BLUE_PIN, zeroValue);
 }
 
+void setNewColor()
+{
+  String inn = Serial.readString();
+
+  if (inn.charAt(0) == 'b')
+  {
+    isBlinking = true;
+    startChar = 1;
+  }
+  else
+  {
+    isBlinking = false;
+    startChar = 0;
+  }
+
+  int separatorIndex = inn.indexOf(':');
+  int separatorIndex2 = inn.indexOf(':', separatorIndex + 1);
+
+  String rString = inn.substring(startChar, separatorIndex);
+  String gString = inn.substring(separatorIndex + 1, separatorIndex2);
+  String bString = inn.substring(separatorIndex2 + 1);
+
+  red = map(rString.toInt(), 0, 255, 0, OUTPUT_MAX_VALUE);
+  green = map(gString.toInt(), 0, 255, 0, OUTPUT_MAX_VALUE);
+  blue = map(bString.toInt(), 0, 255, 0, OUTPUT_MAX_VALUE);
+
+  if (IS_COMMON_ANODE)
+  {
+    red = map(red, 0, OUTPUT_MAX_VALUE, OUTPUT_MAX_VALUE, 0);
+    green = map(green, 0, OUTPUT_MAX_VALUE, OUTPUT_MAX_VALUE, 0);
+    blue = map(blue, 0, OUTPUT_MAX_VALUE, OUTPUT_MAX_VALUE, 0);
+  }
+
+  digitalWrite(RED_PIN, red);
+  digitalWrite(GREEN_PIN, green);
+  digitalWrite(BLUE_PIN, blue);
+}
+
 void loop()
 {
   while (Serial.available() > 0)
   {
-    String inn = Serial.readString();
-
-    if (inn.charAt(0) == 'b')
-    {
-      isBlinking = true;
-      startChar = 1;
-    }
-    else
-    {
-      isBlinking = false;
-      startChar = 0;
-    }
-
-    int separatorIndex = inn.indexOf(':');
-    int separatorIndex2 = inn.indexOf(':', separatorIndex + 1);
-
-    String rString = inn.substring(startChar, separatorIndex);
-    String gString = inn.substring(separatorIndex + 1, separatorIndex2);
-    String bString = inn.substring(separatorIndex2 + 1);
-
-    red = map(rString.toInt(), 0, 255, 0, OUTPUT_MAX_VALUE);
-    green = map(gString.toInt(), 0, 255, 0, OUTPUT_MAX_VALUE);
-    blue = map(bString.toInt(), 0, 255, 0, OUTPUT_MAX_VALUE);
-
-    if (IS_COMMON_ANODE)
-    {
-      red = map(red, 0, OUTPUT_MAX_VALUE, OUTPUT_MAX_VALUE, 0);
-      green = map(green, 0, OUTPUT_MAX_VALUE, OUTPUT_MAX_VALUE, 0);
-      blue = map(blue, 0, OUTPUT_MAX_VALUE, OUTPUT_MAX_VALUE, 0);
-    }
-
-    digitalWrite(RED_PIN, red);
-    digitalWrite(GREEN_PIN, green);
-    digitalWrite(BLUE_PIN, blue);
+    setNewColor();
   }
 
   if (isBlinking)
