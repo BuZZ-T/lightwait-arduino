@@ -1,6 +1,15 @@
-### Arduino
+# lightwait-arduino
 
-#### Build
+This is the code for an [Arduino](https://arduino.cc) based hardware device with one RBG LED which works as a [trigger](https://github.com/BuZZ-T/lightwait#trigger) in the [lightwait-stack](https://github.com/BuZZ-T/lightwait).
+
+It both supports common-anode and common-cathode LEDs. Adapt `IS_COMMON_ANODE` in the code accordingly (See the [Pinouts](#pinouts)).
+
+## Features
+
+* Listening to receive messages in the [lightwait-tp](https://github.com/BuZZ-T/lightwait#lightwait-tp) communication protocol via serial communication.
+* Is currently tested on and supports the following [Arduino](https://arduino.cc)-based platforms
+    * [Arduino Uno](https://store.arduino.cc/arduino-uno-rev3)
+## Build
 
 You can use different tools to build the .ino file. For example:
 
@@ -11,11 +20,13 @@ You can use different tools to build the .ino file. For example:
     * `ino build`
 * arduino-mk
 
-#### Flash
+## Flash
 
 Flash it to Arduino using `avrdude` or tools which use `avrdude`, like the Arduino IDE or stino.
 
-### RBG Led
+TODO:
+
+## RBG Led
 
 6 Pins with the following combinations
 
@@ -24,19 +35,36 @@ Flash it to Arduino using `avrdude` or tools which use `avrdude`, like the Ardui
 * 2+ 4- is blue
 * 6+ 3- is blue 
 
-### Pinout
+<a name="pinouts"></a>
+## Pinouts
+
+There are two example pinouts, both for the Arduino UNO.
+
+They also may contain an optional 10µF capasitor between RESET and GND to prevent resetting the arduino on establishing a new serial connection.  
+Although this capasitor is optional, it has two advantages:
+
+* The serial connection is established faster, making the color change apply faster
+* The [transmitter](https://github.com/BuZZ-T/lightwait/lightwait#transmitter) may keep the serial connection open to update the color extremly fast, as establishing the connection takes most of the time of the update
+* A reset of the arduino implies a reset of all output pins, leading the LED to flicker to off before the color change applies.
+
+### 6-pin common cathode LED
+
+| Color | Arduino Pins | LED Pins 
+|-|-|-|
+| - | GND | 3/4 |
+| red | 9 | 5 |
+| green | 10 | 1 |
+| blue | 11 | 2/6 |
 
 ![Arduino Pinout](lw_arduino.png  "Arduino Pinout")
 
-### Arduino Pins
+### 4-pin common anode LED
 
-    RED_PIN 9 
-    GREEN_PIN 10
-    BLUE_PIN 11
+| Color | Arduino Pins | LED Pins 
+|-|-|-|
+| - | 5V | 2 |
+| red | 9 | 1 |
+| green | 10 | 3 |
+| blue | 11 | 4 |
 
-| Arduino | LED |
-|-|-|
-|GND|3/4|
-|9|5|
-|10|1|
-|11|2/6|
+![Arduino with common anode LED](lw_arduino_common.png "Arduino with common anode LED")
