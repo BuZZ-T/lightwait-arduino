@@ -35,6 +35,27 @@ TODO:
 * 2+ 4- is blue
 * 6+ 3- is blue 
 
+## Test
+
+### Serial connection in terminal
+
+##### Set the correct configuration for the serial communication:
+_(taken from here: https://playground.arduino.cc/Interfacing/LinuxTTY/)_
+
+```
+stty -F /dev/ttyACM0 cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts
+```
+
+* Be sure to use the correct tty interface (here: `/dev/ttyACM0`)
+* The baud rate is set to 9600 in the sketch, so this rate is also used here, adapt it here accordingly if you changed it in the sketch at `Serial.begin(9600)`
+
+##### Send commands via echo
+You can now send commands to the Arduino by piping the echo output to the tty interface:
+```
+echo "255:0:0" > /dev/ttyACM0
+```
+(Again, use the correct tty interface here)
+
 <a name="pinouts"></a>
 ## Pinouts
 
@@ -44,7 +65,6 @@ They also may contain an optional 10µF capasitor between RESET and GND to preve
 Although this capasitor is optional, it has two advantages:
 
 * The serial connection is established faster, making the color change apply faster
-* The [transmitter](https://github.com/BuZZ-T/lightwait/lightwait#transmitter) may keep the serial connection open to update the color extremly fast, as establishing the connection takes most of the time of the update
 * A reset of the arduino implies a reset of all output pins, leading the LED to flicker to off before the color change applies.
 
 ### 6-pin common cathode LED
