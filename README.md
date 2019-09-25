@@ -22,18 +22,12 @@ You can use different tools to build the .ino file. For example:
 
 ## Flash
 
-Flash it to Arduino using `avrdude` or tools which use `avrdude`, like the Arduino IDE or stino.
+For a normal Arduino Uno, use this command to flash the previously compiled binary (adapt the device `/dev/ttyACM0` accordingly):
+```bash
+$ avrdude -patmega328p -carduino -P/dev/ttyACM0 -b115200 -D -Uflash:w:/path/to/lightwait.ino.hex:i
+```
 
-TODO:
-
-## RBG Led
-
-6 Pins with the following combinations
-
-* 5+4- is red
-* 1+ 3- is green
-* 2+ 4- is blue
-* 6+ 3- is blue 
+Alternatively, use tools which use `avrdude` internally, like the [Arduino IDE](https://www.arduino.cc/en/Main/Software), the [Arduino Web Editor](https://create.arduino.cc/editor) or editor plugins like stino for sublime.
 
 ## Test
 
@@ -66,6 +60,8 @@ Although this capasitor is optional, it has two advantages:
 
 * The serial connection is established faster, making the color change apply faster
 * A reset of the arduino implies a reset of all output pins, leading the LED to flicker to off before the color change applies.
+
+**NOTE: Pay attention when using this capasitor when trying to upload new code to the arduino! We observed problems with the arduino programmer syncing with the capasitor attached, leading to a failing upload!**
 
 ### 6-pin common cathode LED
 

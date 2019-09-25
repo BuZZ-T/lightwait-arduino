@@ -2,6 +2,7 @@
 #define GREEN_PIN 10
 #define BLUE_PIN 11
 
+#define INPUT_MAX_VALUE 255
 #define OUTPUT_MAX_VALUE 1023
 #define BLINK_INTERVAL 600
 
@@ -11,7 +12,7 @@ int currentColor = 0;
 
 //////////////////////////
 #define IS_COMMON_ANODE false
-const int zeroValue = IS_COMMON_ANODE ? HIGH : LOW;
+const int zeroValue = IS_COMMON_ANODE ? OUTPUT_MAX_VALUE : 0;
 //////////////////////////
 
 bool isBlinking = false;
@@ -28,16 +29,16 @@ void setup()
   // write the ready signal
   Serial.write("r");
 
-  digitalWrite(RED_PIN, zeroValue);
-  digitalWrite(GREEN_PIN, zeroValue);
-  digitalWrite(BLUE_PIN, zeroValue);
+  analogWrite(RED_PIN, zeroValue);
+  analogWrite(GREEN_PIN, zeroValue);
+  analogWrite(BLUE_PIN, zeroValue);
 }
 
 void setColor(int index)
 {
-  digitalWrite(RED_PIN, (&colors)[index][0]);
-  digitalWrite(GREEN_PIN, (&colors)[index][1]);
-  digitalWrite(BLUE_PIN, (&colors)[index][2]);
+  analogWrite(RED_PIN, colors[index + 0]);
+  analogWrite(GREEN_PIN, colors[index + 1]);
+  analogWrite(BLUE_PIN, colors[index + 2]);
 }
 
 /**
@@ -53,15 +54,19 @@ void parseColor(String colorString, int *buf)
   String gString = colorString.substring(separatorIndex + 1, separatorIndex2);
   String bString = colorString.substring(separatorIndex2 + 1);
 
-  #if IS_COMMON_ANODE
-    buf[0] = map(rString.toInt(), 0, 255, OUTPUT_MAX_VALUE, 0);
-    buf[1] = map(gString.toInt(), 0, 255, OUTPUT_MAX_VALUE, 0);
-    buf[2] = map(bString.toInt(), 0, 255, OUTPUT_MAX_VALUE, 0);
-  #else
-    buf[0] = map(rString.toInt(), 0, 255, 0, OUTPUT_MAX_VALUE);
-    buf[1] = map(gString.toInt(), 0, 255, 0, OUTPUT_MAX_VALUE);
-    buf[2] = map(bString.toInt(), 0, 255, 0, OUTPUT_MAX_VALUE);
-  #endif
+  int rInt = constrain(rString.toInt(), 0, INPUT_MAX_VALUE);
+  int gInt = constrain(gString.toInt(), 0, INPUT_MAX_VALUE);
+  int bInt = constrain(bString.toInt(), 0, INPUT_MAX_VALUE);
+
+#if IS_COMMON_ANODE
+  buf[0] = map(rInt, 0, INPUT_MAX_VALUE, OUTPUT_MAX_VALUE, 0);
+  buf[1] = map(gInt, 0, INPUT_MAX_VALUE, OUTPUT_MAX_VALUE, 0);
+  buf[2] = map(bInt, 0, INPUT_MAX_VALUE, OUTPUT_MAX_VALUE, 0);
+#else
+  buf[0] = map(rInt, 0, INPUT_MAX_VALUE, 0, OUTPUT_MAX_VALUE);
+  buf[1] = map(gInt, 0, INPUT_MAX_VALUE, 0, OUTPUT_MAX_VALUE);
+  buf[2] = map(bInt, 0, INPUT_MAX_VALUE, 0, OUTPUT_MAX_VALUE);
+#endif
 }
 
 /**
@@ -88,7 +93,7 @@ int countColors(String colorString)
 
 /**
  * Read new colors from the Serial connection.
- * Only call this when data is available!
+ * Call this only when data is available!
  */
 void readNewColors()
 {
@@ -97,8 +102,8 @@ void readNewColors()
   isBlinking = inn.charAt(0) == 'b';
 
   String innWithoutBlinking = isBlinking
-    ? inn.substring(1)
-    : inn;
+                                  ? inn.substring(1)
+                                  : inn;
 
   int inputLength = innWithoutBlinking.length() + 1;
   char inputChars[inputLength];
@@ -114,14 +119,16 @@ void readNewColors()
     numberOfColors = 2;
   }
 
+  unsigned long colorArraySize = numberOfColors * 3 * sizeof(int);
+
   // ptr of int array
   if (colors != 0)
   {
-    colors = (int *)realloc(colors, numberOfColors * sizeof(int));
+    colors = (int *)realloc(colors, colorArraySize);
   }
   else
   {
-    colors = (int *)malloc(numberOfColors * sizeof(int));
+    colors = (int *)malloc(colorArraySize);
   }
 
   char *separator = strtok(inputChars, "|");
@@ -133,9 +140,11 @@ void readNewColors()
 
     parseColor(String(separator), colorBuf);
 
-    (&colors)[colorIndex][0] = colorBuf[0];
-    (&colors)[colorIndex][1] = colorBuf[1];
-    (&colors)[colorIndex][2] = colorBuf[2];
+    int colorOffset = colorIndex * 3;
+
+    colors[colorOffset + 0] = colorBuf[0];
+    colors[colorOffset + 1] = colorBuf[1];
+    colors[colorOffset + 2] = colorBuf[2];
 
     colorIndex++;
 
@@ -144,9 +153,9 @@ void readNewColors()
 
   if (addBlack)
   {
-    (&colors)[1][0] = 0;
-    (&colors)[1][1] = 0;
-    (&colors)[1][2] = 0;
+    colors[3] = zeroValue;
+    colors[4] = zeroValue;
+    colors[5] = zeroValue;
   }
 
   currentColor = 0;
@@ -167,7 +176,7 @@ void loop()
     if ((unsigned long)(currentMillis - lastBlink) >= BLINK_INTERVAL)
     {
       currentColor = (currentColor + 1) % numberOfColors;
-      setColor(currentColor);
+      setColor(currentColor * 3);
 
       lastBlink = currentMillis;
     }
