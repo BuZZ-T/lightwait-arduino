@@ -6,7 +6,7 @@ It both supports common-anode and common-cathode LEDs. Adapt `IS_COMMON_ANODE` i
 
 ## Features
 
-* Listening to receive messages in the [lightwait-tp](https://github.com/BuZZ-T/lightwait#lightwait-tp) communication protocol via serial communication.
+* Listening to receive messages in the [lightwait-tp](https://github.com/BuZZ-T/lightwait#transmitter---presenter) communication protocol via serial communication.
 * Is currently tested on and supports the following [Arduino](https://arduino.cc)-based platforms
     * [Arduino Uno](https://store.arduino.cc/arduino-uno-rev3)
 ## Build
@@ -14,8 +14,9 @@ It both supports common-anode and common-cathode LEDs. Adapt `IS_COMMON_ANODE` i
 You can use different tools to build the .ino file. For example:
 
 * The arduino IDE from [arduino.cc](https://www.arduino.cc/en/Main/Software)
+* The  [Arduino Web Editor](https://create.arduino.cc/editor)
 * The Sublime Text plugin for Arduino development [stino](https://github.com/Robot-Will/Stino)
-* ino 
+* [ino](http://inotool.org/) 
     * `pip install ino`
     * `ino build`
 * arduino-mk
